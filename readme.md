@@ -49,7 +49,7 @@ node server.js
     "id": 1,
     "name": "Яндекс",
     "amount": -2500,
-    "date": "2025-03-04",
+    "date": "2025-03-04T09:30:00",
     "status": "success"
   }
 ]
