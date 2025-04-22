@@ -40,11 +40,52 @@ let paymentMethods = [
     { id: 2, type: 'Mastercard', number: '5243 9123 5678 XXXX' }
 ];
 
+let invoiceDetails = [
+    {
+        id: 1,
+        fullName: 'Оливер Лиам',
+        company: 'Викинг Буррито',
+        email: 'oliver@burrito.com',
+        vatNumber: 'FRB1235476'
+    },
+    {
+        id: 2,
+        fullName: 'Анна Смирнова',
+        company: 'Космос Трейд',
+        email: 'anna@cosmos.ru',
+        vatNumber: 'RUS9382746'
+    },
+    {
+        id: 3,
+        fullName: 'Дмитрий Иванов',
+        company: 'Сибирь Софт',
+        email: 'dmitriy@siberia.dev',
+        vatNumber: 'RU38475629'
+    },
+    {
+        id: 4,
+        fullName: 'Алексей Петров',
+        company: 'НаноТех',
+        email: 'aleksei@nanotech.ru',
+        vatNumber: 'RU198237465'
+    },
+    {
+        id: 5,
+        fullName: 'Елена Ким',
+        company: 'iMarket',
+        email: 'elena@imarket.ru',
+        vatNumber: 'RU000123456'
+    }
+];
+
 // API маршруты
 app.get('/accounts', (req, res) => res.json(accounts));
 app.get('/transactions', (req, res) => res.json(transactions));
 app.get('/invoices', (req, res) => res.json(invoices));
 app.get('/payment-methods', (req, res) => res.json(paymentMethods));
+app.get('/invoice-details', (req, res) => {
+    res.json(invoiceDetails);
+});
 
 // Добавление нового способа оплаты
 app.post('/payment-methods', (req, res) => {
@@ -55,6 +96,17 @@ app.post('/payment-methods', (req, res) => {
     const newMethod = { id: paymentMethods.length + 1, type, number };
     paymentMethods.push(newMethod);
     res.status(201).json(newMethod);
+});
+
+// Добавление счета
+app.post('/invoice-details', (req, res) => {
+    const { fullName, company, email, vatNumber } = req.body;
+    if (!fullName || !company || !email || !vatNumber) {
+        return res.status(400).json({ message: 'Заполните все поля' });
+    }
+    const newDetail = { fullName, company, email, vatNumber };
+    invoiceDetails.push(newDetail);
+    res.status(201).json(newDetail);
 });
 
 // Изменение способа оплаты
@@ -68,6 +120,24 @@ app.put('/payment-methods/:id', (req, res) => {
     if (type) method.type = type;
     if (number) method.number = number;
     res.json(method);
+});
+// Обновить данные по id
+app.put('/invoice-details/:id', (req, res) => {
+    const { id } = req.params;
+    const { fullName, company, email, vatNumber } = req.body;
+
+    const detail = invoiceDetails.find(d => d.id === parseInt(id));
+
+    if (!detail) {
+        return res.status(404).json({ message: 'Запись не найдена' });
+    }
+
+    if (fullName) detail.fullName = fullName;
+    if (company) detail.company = company;
+    if (email) detail.email = email;
+    if (vatNumber) detail.vatNumber = vatNumber;
+
+    res.json(detail);
 });
 
 // Фильтрация транзакций по диапазону дат
@@ -89,18 +159,21 @@ app.get('/transactions/filter', (req, res) => {
     res.json(filteredTransactions);
 });
 
-// Удаление счета
-app.delete('/invoices/:id', (req, res) => {
+// Удаление счета по id 
+app.delete('/invoice-details/:id', (req, res) => {
     const { id } = req.params;
-    const initialLength = invoices.length;
-    invoices = invoices.filter(invoice => invoice.id !== id);
+    const initialLength = invoiceDetails.length;
 
-    if (invoices.length < initialLength) {
-        res.json({ message: 'Счёт удалён', id });
+    invoiceDetails = invoiceDetails.filter(d => d.id !== parseInt(id));
+
+    if (invoiceDetails.length < initialLength) {
+        res.json({ message: 'Запись удалена', id: parseInt(id) });
     } else {
-        res.status(404).json({ message: 'Счёт не найден' });
+        res.status(404).json({ message: 'Запись не найдена' });
     }
 });
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
