@@ -86,6 +86,17 @@ app.get('/payment-methods', (req, res) => res.json(paymentMethods));
 app.get('/invoice-details', (req, res) => {
     res.json(invoiceDetails);
 });
+// Получение invoice details по id
+app.get('/invoice-details/:id', (req, res) => {
+    const { id } = req.params;
+    const detail = invoiceDetails.find(d => d.id === parseInt(id));
+    
+    if (!detail) {
+        return res.status(404).json({ message: 'Запись не найдена' });
+    }
+
+    res.json(detail);
+});
 
 // Добавление нового способа оплаты
 app.post('/payment-methods', (req, res) => {
